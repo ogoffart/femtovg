@@ -73,7 +73,7 @@ pub struct Contour {
     point_range: Range<usize>,
     closed: bool,
     bevel: usize,
-    solidity: Solidity,
+    solidity: Option<Solidity>,
     pub(crate) fill: Vec<Vertex>,
     pub(crate) stroke: Vec<Vertex>,
     pub(crate) convexity: Convexity,
@@ -209,12 +209,12 @@ impl PathCache {
                 }
                 Verb::Solid => {
                     if let Some(contour) = cache.contours.last_mut() {
-                        contour.solidity = Solidity::Solid;
+                        contour.solidity = Some(Solidity::Solid);
                     }
                 }
                 Verb::Hole => {
                     if let Some(contour) = cache.contours.last_mut() {
-                        contour.solidity = Solidity::Hole;
+                        contour.solidity = Some(Solidity::Hole);
                     }
                 }
             }
@@ -242,11 +242,11 @@ impl PathCache {
             // Enforce solidity by reversing the winding.
             let area = Contour::polygon_area(points);
 
-            if contour.solidity == Solidity::Solid && area < 0.0 {
+            if contour.solidity == Some(Solidity::Solid) && area < 0.0 {
                 points.reverse();
             }
 
-            if contour.solidity == Solidity::Hole && area > 0.0 {
+            if contour.solidity == Some(Solidity::Hole) && area > 0.0 {
                 points.reverse();
             }
 
